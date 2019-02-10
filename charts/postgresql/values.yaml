@@ -1,0 +1,22 @@
+---
+
+#
+#
+#
+
+revisionHistoryLimit: 3
+replicaCount: 1
+image:
+  name: postgresql
+  tag: 10.3
+  pullPolicy: Never
+service:
+  type: ClusterIP
+  port: 5432
+env: []
+storage:
+  rootPath: /var/lib/pgsql/10/data
+  mountPath: /var/lib/pgsql/10/data
+volumes:
+    path: "/var/lib/pgsql/10/data"
+matchExpressionKey: kubernetes.io/postgresql

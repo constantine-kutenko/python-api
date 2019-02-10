@@ -1,0 +1,6 @@
+### Application specific ignores:
+app/migrations
+
+### Common ignores:
+**/.git*
+**/*.md

@@ -1,0 +1,12 @@
+### Application specific ignores:
+app/migrations
+
+### Common ignores:
+__pycache__
+**/.git*
+**/*.md
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
