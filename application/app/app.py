@@ -7,10 +7,12 @@ import uuid
 import os
 from flask import request, render_template, jsonify, redirect
 from flask_restful import reqparse
+from flask_httpauth import HTTPBasicAuth
 from json2html import *
 
 
 app = flask.Flask(__name__)
+auth = HTTPBasicAuth()
 
 
 def databaseConection():
@@ -43,6 +45,27 @@ def response(code, data):
         return flask.Response(status=code)
 
 
+# Authentication
+
+# @auth.get_password
+@auth.verify_password
+def verifyUser(username,password):
+    """Verify a username and a password"""
+    with databaseConection() as database:
+        # Get user credentials for the database
+        user = database.query("SELECT username, password FROM users")
+        # Verify a username against the database
+        if(username == user[0]["username"] and password == user[0]["password"]):
+            return True
+    return False
+
+
+@auth.error_handler
+def unauthorized():
+    return response(401, {'error':'Unauthorized Access'})
+
+# Handlers
+
 @app.errorhandler(400)
 def not_found(error):  
     return response(400, {'error':'Bad Request'})
@@ -57,6 +80,7 @@ def not_found(error):
 def not_found(error):
     return response(405, {'error':'Method Not Allowed'})
 
+# Define the API resources
 
 @app.route('/')
 def rootIndex():
@@ -65,6 +89,7 @@ def rootIndex():
 
 
 @app.route('/people', methods=['GET'])
+@auth.login_required
 def getPassengers():
     """Get a list of all passengers from the database"""
     with databaseConection() as database:
@@ -93,6 +118,7 @@ def getPassengers():
     
 
 @app.route('/people/<string:uuid>', methods=['GET'])
+@auth.login_required
 def getPassenger(uuid):
     """Get a passenger's information by its UUID"""
     with databaseConection() as database:
@@ -123,6 +149,7 @@ def getPassenger(uuid):
 
 
 @app.route('/people', methods=['POST'])
+@auth.login_required
 def addPassenger():
     """Add a new passenger to the database"""
     # Parse arguments provided
@@ -181,6 +208,7 @@ def addPassenger():
 
 
 @app.route('/people/<string:uuid>', methods=['DELETE'])
+@auth.login_required
 def removePassenger(uuid):
     """Remove a passenger by its UUID"""
     with databaseConection() as database:
@@ -194,6 +222,7 @@ def removePassenger(uuid):
 
 
 @app.route('/people/<string:uuid>', methods=['PUT'])
+@auth.login_required
 def alterPassenger(uuid):
     """Alter passenger's information"""
     # Parse arguments provided
