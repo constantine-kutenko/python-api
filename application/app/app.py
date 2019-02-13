@@ -5,7 +5,7 @@ import flask
 import json
 import uuid
 import os
-from flask import request, render_template, jsonify, redirect
+from flask import request, render_template, jsonify, redirect, flash, session
 from flask_restful import reqparse
 from flask_httpauth import HTTPBasicAuth
 from json2html import *
@@ -80,16 +80,36 @@ def not_found(error):
 def not_found(error):
     return response(405, {'error':'Method Not Allowed'})
 
-# Define the API resources
 
-@app.route('/')
+@app.route('/login', methods=['GET','POST'])
+def loginUser():
+    """Show login screen if logged out"""
+    if request.method == 'POST':
+        if verifyUser(request.form['username'], request.form['password']):
+            session['logged_in'] = True
+            return rootIndex()
+        else:
+            return response(401, {'error':'Unauthorized Access'})
+
+
+@app.route("/logout")
+def logoutUser():
+    session['logged_in'] = False
+    return rootIndex()
+
+
+@app.route('/', methods=['GET','POST'])
 def rootIndex():
     """
     Display index (default) page.
     This endpoint is also used for HTTP health checks.
     """
+    # Verify if user has already logged in
+    if not session.get('logged_in'):
+        return render_template('login.html')
     return "<h>Python API v1</h1><p>The application is meant to be used to manage the information about passengers"
 
+# Define the API resources
 
 @app.route('/people', methods=['GET'])
 @auth.login_required
@@ -264,4 +284,5 @@ if __name__ == '__main__':
     app.debug = True
     app_address = os.environ.get('APP_ADDRESS')
     app_port = int(os.environ.get('APP_PORT'))
+    app.secret_key = os.urandom(24)
     app.run(host=app_address,port=app_port)
