@@ -12,7 +12,7 @@ COPY docker/entrypoint.sh /entrypoint.sh
 
 WORKDIR /app
 
-RUN apk add --no-cache python3 netcat-openbsd && \
+RUN apk add --no-cache python3 netcat-openbsd curl && \
     python3 -m ensurepip && \
     pip3 install --upgrade pip setuptools && \
     if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \

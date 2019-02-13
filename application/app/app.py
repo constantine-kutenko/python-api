@@ -84,7 +84,10 @@ def not_found(error):
 
 @app.route('/')
 def rootIndex():
-    """Display index (default) page"""
+    """
+    Display index (default) page.
+    This endpoint is also used for HTTP health checks.
+    """
     return "<h>Python API v1</h1><p>The application is meant to be used to manage the information about passengers"
 
 

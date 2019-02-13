@@ -1,0 +1,49 @@
+---
+
+#
+#
+#
+
+version: '3.4'
+services:
+  frontend:
+    container_name: python-api-frontend
+    build:
+      context: application/
+      dockerfile: ./docker/Dockerfile
+    ports:
+      - "5000:5000/tcp"
+    environment: 
+      POSTGRESQL_SERVICE_HOST: 192.172.253.49
+      POSTGRESQL_SERVICE_PORT: 5432
+      POSTGRESQL_REQUEST_TIMEOUT: 3
+      POSTGRESQL_DATABASE_NAME: passengers
+      POSTGRESQL_DATABASE_USER: titanic
+      POSTGRESQL_DATABASE_PASSWORD: 
+      APP_ADDRESS: 0.0.0.0
+      APP_PORT: 5000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 1m
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+    restart: on-failure
+    depends_on:
+      - database
+  database:
+    container_name: python-api-database
+    build:
+      context: database/
+      dockerfile: ./docker/Dockerfile
+    ports:
+      - "5432:5432/tcp"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 2s
+      retries: 3
+    volumes:
+      - /var/lib/pgsql/10/data:/var/lib/pgsql/10/data
+    stop_grace_period: 25s
+
